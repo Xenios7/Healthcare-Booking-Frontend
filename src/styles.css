@@ -1,0 +1,69 @@
+/* Card container */
+.form-card {
+  max-width: 860px;                 /* comfortable reading width */
+  margin-inline: auto;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-card-background-color, var(--pico-background-color));
+  box-shadow: 0 6px 18px hsl(215 35% 8% / .35);
+}
+
+/* Role buttons row */
+.role-toggle {
+  display: flex;
+  gap: .625rem;
+  flex-wrap: wrap;                  /* wrap on small screens */
+  margin-bottom: 1rem;
+}
+
+/* Responsive fields grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* wider min */
+  gap: 1rem 1.25rem;
+  align-items: start;               /* avoid bottom-align squish */
+}
+
+/* Labels & inputs inside the grid */
+.form-grid label {
+  display: block;
+  white-space: normal;
+  word-break: normal;               /* no vertical letter stacks */
+  overflow-wrap: break-word;
+  min-inline-size: 0;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  inline-size: 100%;
+}
+
+/* Span helpers */
+.form-grid .span-2 { grid-column: span 2; }
+.form-grid .span-all { grid-column: 1 / -1; }
+
+/* Actions on the bottom-right */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+/* Page header spacing */
+.page-title { margin-bottom: .5rem; }
+.muted { color: var(--pico-muted-color); }
+
+/* Small screens */
+@media (max-width: 480px) {
+  .form-card { padding: 1rem; }
+  .form-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+}
+
+/* Large screens */
+@media (min-width: 1100px) {
+  .form-card { max-width: 980px; }
+  .form-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+}
