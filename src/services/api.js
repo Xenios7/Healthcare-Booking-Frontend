@@ -1,54 +1,79 @@
 // src/services/api.js
-const BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-const LOGIN_PATH = import.meta.env.VITE_LOGIN_PATH || "/api/auth/login";
-const ME_PATH    = import.meta.env.VITE_ME_PATH || "/api/auth/me";
-const PATIENT_REGISTER_PATH = import.meta.env.VITE_PATIENT_REGISTER_PATH || "/api/patients/register";
-const DOCTOR_REGISTER_PATH  = import.meta.env.VITE_DOCTOR_REGISTER_PATH  || "/api/doctors/register";
+const BASE = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8080").replace(/\/$/, "");
 
-async function handle(res) {
-  if (!res.ok) {
-    let msg = "Request failed";
-    try {
-      const data = await res.json();
-      msg = data?.message || data?.error || msg;
-    } catch {}
-    throw new Error(msg);
+async function http(path, { method = "GET", body, token, headers } = {}) {
+  const url = `${BASE}${path.startsWith("/") ? "" : "/"}${path}`;
+
+  const finalHeaders = {
+    ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(headers || {}),
+  };
+
+  const res = await fetch(url, {
+    method,
+    headers: finalHeaders,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+
+  let data = null;
+  if (res.status !== 204) {
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) {
+      try { data = await res.json(); } catch {}
+    } else {
+      try { const t = await res.text(); data = t || null; } catch {}
+    }
   }
-  // Some endpoints may 204
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+    const err = new Error((data && (data.message || data.error)) || `${res.status} ${res.statusText}`);
+    err.status = res.status;
+    err.data = data;
+    throw err;
+  }
+  return data;
 }
 
-export async function login(email, password) {
-  const res = await fetch(BASE + LOGIN_PATH, {
+export function login(email, password) {
+  return http("/api/auth/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: { email, password },
   });
-  return handle(res);
 }
 
-export async function me(token) {
-  const res = await fetch(BASE + ME_PATH, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return handle(res);
-}
+// Try specific endpoints and return both user and detected role
+export async function me(token, roleHint) {
+  const norm = (s) => String(s || "").toUpperCase().replace(/^ROLE_/, "");
+  const hint = norm(roleHint);
 
-export async function registerPatient(payload) {
-  const res = await fetch(BASE + PATIENT_REGISTER_PATH, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return handle(res);
-}
+  const tryGet = async (path, roleDetected) => {
+    const user = await http(path, { token });
+    return { user, roleDetected };
+  };
 
-export async function registerDoctor(payload) {
-  const res = await fetch(BASE + DOCTOR_REGISTER_PATH, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return handle(res);
+  const order = [];
+  if (hint === "PATIENT") order.push(["/api/patients/me", "PATIENT"]);
+  if (hint === "DOCTOR")  order.push(["/api/doctors/me",  "DOCTOR"]);
+  if (hint === "ADMIN")   order.push(["/api/admins/me",   "ADMIN"], ["/api/users/me", "ADMIN"]);
+
+  if (!order.length) {
+    // No hint: try both common ones
+    order.push(
+      ["/api/patients/me", "PATIENT"],
+      ["/api/doctors/me",  "DOCTOR"],
+      ["/api/users/me",    null]      // fallback, if you have it
+    );
+  }
+
+  let lastErr;
+  for (const [path, roleDetected] of order) {
+    try {
+      return await tryGet(path, roleDetected);
+    } catch (e) {
+      lastErr = e;
+      if (![401, 403, 404].includes(e?.status)) throw e;
+    }
+  }
+  throw lastErr || new Error("Unable to load current user");
 }

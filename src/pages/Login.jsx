@@ -6,15 +6,13 @@ import { useAuth } from "../hooks/useAuth.jsx";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, loading, error, role: currentRole } = useAuth();
+  const { login, loading, error } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
 
   function roleHome(r) {
-    const norm = String(r || "")
-      .toUpperCase()
-      .replace(/^ROLE_/, "");
+    const norm = String(r || "").toUpperCase().replace(/^ROLE_/, "");
     switch (norm) {
       case "PATIENT":
         return "/patient";
@@ -29,16 +27,10 @@ export default function Login() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    const result = await login(email, password); // { ok, role? }
-    if (!result?.ok) return;
+    const { ok, role } = await login(email, password);
+    if (!ok) return;
 
-    // If the user wasn't redirected from a protected route, send them to their role home.
-    let target = from;
-    if (from === "/" || from === "/login") {
-      const r = result.role ?? currentRole;
-      target = roleHome(r);
-    }
-
+    const target = (from === "/" || from === "/login") ? roleHome(role) : from;
     navigate(target, { replace: true });
   }
 

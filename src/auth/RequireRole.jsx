@@ -1,14 +1,19 @@
+// src/auth/RequireRole.jsx
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "./AuthContext";
-import { normalizeRole } from "./roles";
+import { useAuth } from "./AuthContext.jsx";
+import { hasRole } from "./roles.js";
 
 export default function RequireRole({ allowed, children }) {
-  const { role } = useAuth();
+  const { token, role } = useAuth();
   const location = useLocation();
 
-  if (!role) {
+  if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  const r = normalizeRole(role);
-  return allowed.includes(r) ? children : <Navigate to="/403" replace />;
+
+  if (!hasRole(role, allowed)) {
+    return <Navigate to="/403" replace />;
+  }
+
+  return children;
 }
