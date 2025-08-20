@@ -15,7 +15,9 @@ function decodeRoleFromToken(token) {
   try {
     const [, payloadB64] = String(token).split(".");
     if (!payloadB64) return null;
-    const payload = JSON.parse(atob(payloadB64));
+    // handle base64url -> base64
+    const base64 = payloadB64.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(base64));
     // Accept a few common claim shapes
     const claim =
       payload.role ||
@@ -35,7 +37,10 @@ export function AuthProvider({ children }) {
 
   // Derive role from user (preferred) or from JWT
   const roleFromToken = useMemo(() => decodeRoleFromToken(token), [token]);
-  const role = useMemo(() => user?.role ?? roleFromToken ?? null, [user?.role, roleFromToken]);
+  const role = useMemo(
+    () => user?.role ?? roleFromToken ?? null,
+    [user?.role, roleFromToken]
+  );
 
   // Load user when token changes
   useEffect(() => {
@@ -130,4 +135,3 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within <AuthProvider>");
   return ctx;
 }
-o 
