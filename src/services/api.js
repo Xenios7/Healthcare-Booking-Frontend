@@ -42,38 +42,56 @@ export function login(email, password) {
   });
 }
 
-// Try specific endpoints and return both user and detected role
+// src/services/api.js
 export async function me(token, roleHint) {
-  const norm = (s) => String(s || "").toUpperCase().replace(/^ROLE_/, "");
-  const hint = norm(roleHint);
-
-  const tryGet = async (path, roleDetected) => {
-    const user = await http(path, { token });
-    return { user, roleDetected };
+  const tryGet = async (path) => {
+    try {
+      const data = await http(path, { token });
+      return { ok: true, data };
+    } catch (e) {
+      // Treat these as "not mine, try next"
+      if ([401, 403, 404, 500].includes(e?.status)) return { ok: false, status: e.status };
+      // Anything else (e.g., network) should still bubble up
+      throw e;
+    }
   };
 
-  const order = [];
-  if (hint === "PATIENT") order.push(["/api/patients/me", "PATIENT"]);
-  if (hint === "DOCTOR")  order.push(["/api/doctors/me",  "DOCTOR"]);
-  if (hint === "ADMIN")   order.push(["/api/admins/me",   "ADMIN"], ["/api/users/me", "ADMIN"]);
+  const norm = (v) => (v ? String(v).toUpperCase().replace(/^ROLE_/, "") : null);
+  const hint = norm(roleHint);
 
-  if (!order.length) {
-    // No hint: try both common ones
-    order.push(
-      ["/api/patients/me", "PATIENT"],
-      ["/api/doctors/me",  "DOCTOR"],
-      ["/api/users/me",    null]      // fallback, if you have it
-    );
-  }
+  const byRole = {
+    ADMIN: "/api/admins/me",
+    DOCTOR: "/api/doctors/me",
+    PATIENT: "/api/patients/me",
+  };
 
-  let lastErr;
-  for (const [path, roleDetected] of order) {
-    try {
-      return await tryGet(path, roleDetected);
-    } catch (e) {
-      lastErr = e;
-      if (![401, 403, 404].includes(e?.status)) throw e;
+  // Try the hinted role first if we have one, then the rest, then generic fallbacks
+  const hinted = hint && byRole[hint] ? [byRole[hint]] : [];
+  const candidates = [
+    ...hinted,
+    "/api/patients/me",
+    "/api/doctors/me",
+    "/api/admins/me",
+    "/api/users/me",
+    "/api/auth/me",
+  ].filter(Boolean);
+
+  const seen = new Set();
+  for (const path of candidates) {
+    if (seen.has(path)) continue;
+    seen.add(path);
+
+    const res = await tryGet(path);
+    if (res.ok) {
+      let roleDetected = null;
+      if (path.includes("/patients/")) roleDetected = "PATIENT";
+      else if (path.includes("/doctors/")) roleDetected = "DOCTOR";
+      else if (path.includes("/admins/")) roleDetected = "ADMIN";
+      return { user: res.data, roleDetected };
     }
   }
-  throw lastErr || new Error("Unable to load current user");
+
+  const err = new Error("Forbidden");
+  err.status = 403;
+  throw err;
 }
