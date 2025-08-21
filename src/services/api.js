@@ -42,16 +42,13 @@ export function login(email, password) {
   });
 }
 
-// src/services/api.js
 export async function me(token, roleHint) {
   const tryGet = async (path) => {
     try {
       const data = await http(path, { token });
       return { ok: true, data };
     } catch (e) {
-      // Treat these as "not mine, try next"
       if ([401, 403, 404, 500].includes(e?.status)) return { ok: false, status: e.status };
-      // Anything else (e.g., network) should still bubble up
       throw e;
     }
   };
@@ -65,7 +62,6 @@ export async function me(token, roleHint) {
     PATIENT: "/api/patients/me",
   };
 
-  // Try the hinted role first if we have one, then the rest, then generic fallbacks
   const hinted = hint && byRole[hint] ? [byRole[hint]] : [];
   const candidates = [
     ...hinted,
@@ -95,3 +91,20 @@ export async function me(token, roleHint) {
   err.status = 403;
   throw err;
 }
+
+/* -------------------- ADDITIONS FOR DOCTOR SEARCH/DETAIL -------------------- */
+
+// Search doctors by speciality
+export function searchDoctorsBySpeciality(speciality, token) {
+  const spec = String(speciality || "").trim();
+  if (!spec) return Promise.resolve([]); // no query -> empty list
+  return http(`/api/doctors/speciality/${encodeURIComponent(spec)}`, { token });
+}
+
+// Get a single doctor by id
+export function getDoctorById(id, token) {
+  return http(`/api/doctors/${encodeURIComponent(id)}`, { token });
+}
+
+// Back-compat: if some page still calls api.listDoctors(...)
+export const listDoctors = searchDoctorsBySpeciality;
