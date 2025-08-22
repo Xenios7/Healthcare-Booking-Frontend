@@ -96,7 +96,6 @@ export default function App() {
             path="/doctor/slots"
             element={
               <RequireRole allowed={["DOCTOR"]}>
-                <ComingSoon title="My Slots" />
                 <DoctorSlots />
               </RequireRole>
             }

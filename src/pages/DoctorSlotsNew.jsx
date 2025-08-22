@@ -1,13 +1,10 @@
 // src/pages/DoctorSlotsNew.jsx
 // Create available slots for the logged-in doctor.
 // Endpoints used (as per your controller):
-//   GET  /api/doctors/me                                  -> fetch current doctor (id)
-//   POST /api/appointmentSlots                            -> create a slot (SlotCreateDTO)
-//   GET  /api/appointmentSlots/by-doctor/{doctorId}       -> all slots for doctor
-//   GET  /api/appointmentSlots/by-doctor/{doctorId}/available -> available slots (LIST)
-//   GET  /api/appointmentSlots/by-doctor/{doctorId}/available/sorted -> FIRST available slot (SINGLE obj)
-// NOTE: The "/available/sorted" endpoint returns a SINGLE AppointmentSlotDTO, not a list.
-// This UI uses the LIST endpoint to show existing slots, and also shows the earliest one separately.
+//   GET  /api/doctors/me
+//   POST /api/appointmentSlots
+//   GET  /api/appointmentSlots/by-doctor/{doctorId}/available
+//   GET  /api/appointmentSlots/by-doctor/{doctorId}/available/sorted  (single)
 
 import React from "react";
 
@@ -49,6 +46,26 @@ function addMinutes(timeStr, minutes) {
   const nm = total % 60;
   return `${String(nh).padStart(2, "0")}:${String(nm).padStart(2, "0")}`;
 }
+
+/** ---------- Formatting helpers (non-breaking) ---------- */
+// "17 Nov 2025, 9:00 - 10:00"
+function slotLabel(start, end) {
+  if (!start || !end) return "—";
+  try {
+    const s = new Date(start);
+    const e = new Date(end);
+    if (isNaN(s) || isNaN(e)) return `${start} - ${end}`;
+    const mon = s.toLocaleString(undefined, { month: "short" });
+    const hm = (d) => `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+    return `${s.getDate()} ${mon} ${s.getFullYear()}, ${hm(s)} - ${hm(e)}`;
+  } catch {
+    return `${start} - ${end}`;
+  }
+}
+function previewLabel(date, from, to) {
+  return slotLabel(toLocalDateTime(date, from), toLocalDateTime(date, to));
+}
+/** ------------------------------------------------------- */
 
 export default function DoctorSlotsNew() {
   const [me, setMe] = React.useState(null);
@@ -177,75 +194,87 @@ export default function DoctorSlotsNew() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold">Create Time Slots</h1>
+    <div className="max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold">Create Time Slots</h1>
       {loading && <p className="mt-2 text-gray-500">Loading…</p>}
       {error && <div className="mt-3 p-3 rounded bg-red-100 text-red-800 border border-red-200">{error}</div>}
       {success && <div className="mt-3 p-3 rounded bg-green-100 text-green-800 border border-green-200">{success}</div>}
 
       {me && (
-        <div className="mt-4 p-3 border rounded">
-          <div className="text-sm text-gray-600">Doctor</div>
-          <div className="font-medium">{me.fullName || me.name || me.email} (ID: {me.id})</div>
+        <div className="mt-4 p-4 border rounded bg-white/5">
+          <div className="text-sm text-gray-400">Doctor</div>
+          <div className="font-medium">
+            {me.fullName || me.name || me.email} <span className="text-gray-400">(ID: {me.id})</span>
+          </div>
         </div>
       )}
 
-      <section className="mt-6 p-4 border rounded space-y-3">
-        <h2 className="text-lg font-semibold">New slot(s)</h2>
+      {/* New slots form */}
+      <section className="mt-6 p-4 border rounded bg-white/5 space-y-3">
+        <h2 className="text-xl font-semibold">New slot(s)</h2>
+
         <div className="grid md:grid-cols-2 gap-3">
           <label className="flex flex-col">
-            <span className="text-sm">Date</span>
-            <input type="date" className="border rounded px-3 py-2" value={date} onChange={e=>setDate(e.target.value)} />
+            <span className="text-sm text-gray-400">Date</span>
+            <input type="date" className="border rounded px-3 py-2 bg-transparent" value={date} onChange={e=>setDate(e.target.value)} />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm">Location (optional)</span>
-            <input className="border rounded px-3 py-2" value={location} onChange={e=>setLocation(e.target.value)} placeholder="e.g., Clinic A, Room 3" />
+            <span className="text-sm text-gray-400">Location (optional)</span>
+            <input className="border rounded px-3 py-2 bg-transparent" value={location} onChange={e=>setLocation(e.target.value)} placeholder="e.g., Clinic A, Room 3" />
           </label>
         </div>
+
         <div className="grid md:grid-cols-3 gap-3">
           <label className="flex flex-col">
-            <span className="text-sm">Start time</span>
-            <input type="time" className="border rounded px-3 py-2" value={startTime} onChange={e=>setStartTime(e.target.value)} />
+            <span className="text-sm text-gray-400">Start time</span>
+            <input type="time" className="border rounded px-3 py-2 bg-transparent" value={startTime} onChange={e=>setStartTime(e.target.value)} />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm">End time</span>
-            <input type="time" className="border rounded px-3 py-2" value={endTime} onChange={e=>setEndTime(e.target.value)} />
+            <span className="text-sm text-gray-400">End time</span>
+            <input type="time" className="border rounded px-3 py-2 bg-transparent" value={endTime} onChange={e=>setEndTime(e.target.value)} />
           </label>
           <label className="flex flex-col">
-            <span className="text-sm">Duration (minutes)</span>
-            <input type="number" min="5" step="5" className="border rounded px-3 py-2" value={duration} onChange={e=>setDuration(Number(e.target.value))} />
+            <span className="text-sm text-gray-400">Duration (minutes)</span>
+            <input type="number" min="5" step="5" className="border rounded px-3 py-2 bg-transparent" value={duration} onChange={e=>setDuration(Number(e.target.value))} />
           </label>
         </div>
+
         <div className="flex gap-2">
           <button type="button" className="px-4 py-2 rounded border" onClick={buildPreview}>Preview slots</button>
           <button type="button" className="px-4 py-2 rounded bg-black text-white" onClick={createAll} disabled={!date || !startTime || !endTime || !duration || Number(duration) <= 0 || endTime <= startTime}>Create</button>
         </div>
+
         {preview.length>0 && (
-          <div className="mt-2 text-sm text-gray-600">{preview.length} slot(s) will be created for {date}.</div>
-        )}
-        {preview.length>0 && (
-          <div className="grid md:grid-cols-2 gap-2 mt-2">
-            {preview.map((p,i)=> (
-              <div key={i} className="p-2 border rounded text-sm">
-                {p.start} – {p.end}
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="mt-2 text-sm text-gray-600">{preview.length} slot(s) will be created for {date}.</div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {preview.map((p,i)=> (
+                <div key={i} className="px-3 py-1 border rounded-full text-sm">
+                  {previewLabel(date, p.start, p.end)}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </section>
 
-      <section className="mt-6 p-4 border rounded">
+      {/* Existing slots */}
+      <section className="mt-6 p-4 border rounded bg-white/5">
         <h2 className="text-lg font-semibold">Existing available slots</h2>
         {earliest && (
-          <div className="mb-2 text-sm">Earliest free slot: <span className="font-medium">{pretty(earliest.startTime)} – {pretty(earliest.endTime)}</span></div>
+          <div className="mt-3 p-3 rounded bg-green-50/10 border border-green-200/30">
+            <div className="text-sm text-green-300">Earliest free slot</div>
+            <div className="font-medium">{slotLabel(earliest.startTime, earliest.endTime)}</div>
+            {earliest.location && <div className="text-xs text-gray-400 mt-1">{earliest.location}</div>}
+          </div>
         )}
-        {existing.length === 0 && <div className="text-sm text-gray-500">No free slots.</div>}
-        <div className="grid md:grid-cols-2 gap-2 mt-2">
+        {existing.length === 0 && <div className="text-sm text-gray-500 mt-3">No free slots.</div>}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
           {existing.map(s => (
-            <div key={s.id} className="p-2 border rounded text-sm">
-              <div className="font-medium">#{s.id}</div>
-              <div>{pretty(s.startTime)} – {pretty(s.endTime)}</div>
-              {s.location && <div className="text-xs opacity-70">{s.location}</div>}
+            <div key={s.id} className="p-3 border rounded text-sm hover:shadow-sm transition">
+              <div className="text-xs text-gray-400">Slot #{s.id}</div>
+              <div className="mt-1 font-medium">{slotLabel(s.startTime, s.endTime)}</div>
+              {s.location && <div className="text-xs text-gray-400 mt-1">{s.location}</div>}
             </div>
           ))}
         </div>

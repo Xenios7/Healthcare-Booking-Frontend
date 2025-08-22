@@ -428,12 +428,6 @@ async function handleReject(apptId) {
         </section>
       )}
 
-      {primaryRole === 'DOCTOR' && (
-        <section className="mt-10">
-          <h2 className="text-xl font-semibold">Doctor actions</h2>
-          <p className="text-sm text-gray-600 mt-1">Approve or reject pending appointments directly in the table above.</p>
-        </section>
-      )}
 
       {primaryRole === 'ADMIN' && (
         <section className="mt-10">
