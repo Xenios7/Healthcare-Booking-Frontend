@@ -187,8 +187,8 @@ export default function MyProfile() {
             <label className="flex flex-col">
               <span className="text-sm">Allergies</span>
               <textarea rows={3} className="border rounded px-3 py-2" placeholder="e.g., penicillin; peanuts" value={allergies} onChange={e=>setAllergies(e.target.value)} />
-              <span className="text-xs text-gray-500 mt-1">Free text; saved as a single string.</span>
             </label>
+
 
             <div className="flex gap-2">
               <button type="submit" disabled={saving || !hasChanges()} className="px-4 py-2 rounded bg-black text-white disabled:opacity-50">

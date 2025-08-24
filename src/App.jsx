@@ -76,7 +76,7 @@ export default function App() {
             path="/me/profile"
             element={
               <RequireRole allowed={["PATIENT"]}>
-                <ComingSoon title="My Profile" />
+                <ComingSoon title="" />
                 <MyProfile />
               </RequireRole>
             }

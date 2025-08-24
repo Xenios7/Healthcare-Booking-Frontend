@@ -18,15 +18,15 @@ export default function DoctorDashboard() {
         </Tile>
 
         <Tile to="/doctor/slots" title="My Slots">
-          See / edit your upcoming availability. (placeholder)
+          See / edit your upcoming availability.
         </Tile>
 
         <Tile to="/doctor/appointments" title="Today’s Appointments">
-          View today’s schedule and patient details. (placeholder)
+          View today’s schedule and patient details.
         </Tile>
 
         <Tile to="/doctor/profile" title="My Profile">
-          Update speciality, location, license number. (placeholder)
+          Update speciality, location, license number. 
         </Tile>
       </TileGrid>
     </main>

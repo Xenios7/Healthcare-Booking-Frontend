@@ -22,7 +22,7 @@ export default function PatientDashboard() {
         </Tile>
 
         <Tile to="/me/profile" title="My Profile">
-          Update name, email, allergies, insurance. (placeholder)
+          Update name, email, allergies, insurance.
         </Tile>
       </TileGrid>
     </main>

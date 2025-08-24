@@ -15,15 +15,15 @@ export default function AdminDashboard() {
         </Tile>
 
         <Tile to="/admin/admins/new" title="Create Admin">
-          Add another admin. (uses /api/admins/admins)
+          Add another admin. 
         </Tile>
 
         <Tile to="/admin/users" title="Manage Users">
-          Search, edit, or deactivate users. (placeholder)
+          Search, edit, or deactivate users.
         </Tile>
 
         <Tile to="/admin/appointments" title="All Appointments">
-          System-wide appointment view. (placeholder)
+          System-wide appointment view.
         </Tile>
       </TileGrid>
     </main>
