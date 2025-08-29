@@ -1,27 +1,13 @@
-# Medical Booking — Frontend (Vite + React)
+# 🏥 Healthcare Booking App
+End-to-end medical appointments platform: patients book visits, doctors manage availability, admins oversee operations.
 
-A tiny React UI to demo your Spring Boot booking API.
+## 🚀 Live demo
+- Web: https://medicalbooking.koyeb.app/
+- API: https://medicalbooking-api.koyeb.app/  (Swagger at `/swagger-ui`)
 
-## Quick start
-
+## ⚡ Quick start (local)
 ```bash
-npm install
-npm run dev
-```
-
-Then open the printed URL (default: http://localhost:5173).
-
-## Configure endpoints
-
-Copy `.env.example` to `.env` and adjust if your backend paths differ:
-
-```
-VITE_API_BASE_URL=http://localhost:8080
-VITE_LOGIN_PATH=/auth/login
-VITE_APPOINTMENTS_PATH=/api/appointments
-VITE_ADMIN_PATH=/api/admin/users
-```
-
-The app expects your login endpoint to return a JWT, either as plain text or JSON:
-- `{ "token": "xxx.yyy.zzz" }` or `{ "jwt": "..."}` ...
-- or just the token string body.
+cp .env.example .env
+docker compose up -d
+# Web → http://localhost:3000
+# API → http://localhost:8080
