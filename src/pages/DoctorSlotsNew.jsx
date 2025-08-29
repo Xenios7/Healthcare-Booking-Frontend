@@ -8,7 +8,7 @@
 
 import React from "react";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").trim();
 
 async function api(path, { method = "GET", body, headers = {} } = {}) {
   const token = localStorage.getItem("token");

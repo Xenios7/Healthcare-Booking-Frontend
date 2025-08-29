@@ -3,7 +3,7 @@
 // Assumes your JWT is stored in localStorage under key "token" after login.
 // API base URL can be configured via VITE_API_BASE (defaults to http://localhost:8080)
 import React from 'react';
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").trim();
 
 function decodeJwt(token) {
   try {
