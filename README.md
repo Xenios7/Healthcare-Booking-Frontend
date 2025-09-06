@@ -1,7 +1,7 @@
 # Medical Booking – Frontend (React + Vite)
 
 A lightweight **React + Vite** frontend for the Medical Booking system.  
-The **backend (Spring Boot API)** lives here → https://github.com/Xenios7/bookingapi
+The **backend (Spring Boot API)** lives here → https://github.com/Xenios7/Healthcare-Booking-Api
 
 ---
 
@@ -14,50 +14,27 @@ The **backend (Spring Boot API)** lives here → https://github.com/Xenios7/book
 
 ---
 
-## ⚙️ Quick Start
-
-```bash
-# 1) Clone
-git clone <your-frontend-repo-url>
-cd <your-frontend-repo-folder>
-
-# 2) Environment
-cp .env.example .env
-# then set VITE_API_URL to your API (cloud or local)
-
-# 3) Install deps
-npm install
-
-# 4) Run dev server
-npm run dev
-```
-
-### .env example
-```dotenv
-# API base URL (choose one)
-VITE_API_URL=https://medicalbooking-api.koyeb.app
-# VITE_API_URL=http://localhost:8080
-```
-
-> If you run the API locally, ensure backend CORS allows your dev origin (e.g., http://localhost:5173).
-
----
-
 ## 🧱 Project Structure (frontend)
+
 
 ```
 .
-├─ public/
-│  └─ index.html
-└─ src/
-   ├─ auth/           # auth-related components/hooks
-   ├─ components/     # shared UI
-   ├─ hooks/          # custom hooks
-   ├─ pages/          # Login, Dashboards, Booking
-   ├─ services/       # API calls (uses VITE_API_URL)
-   ├─ App.jsx
-   ├─ main.jsx
-   └─ styles.css
+├─ src/
+│  ├─ auth/                      # Auth-related components/hooks
+│  ├─ components/                # Shared/reusable UI components
+│  ├─ hooks/                     # Custom React hooks
+│  ├─ pages/                     # Page-level views (Login, Dashboard, Booking)
+│  ├─ services/                  # API integration (e.g. axios/fetch)
+│  ├─ App.jsx                    # Root app component
+│  ├─ main.jsx                   # React entry point
+│  └─ styles.css                 # Global styles
+│
+├─ index.html                    # HTML entry point
+├─ .env / .env.example           # Env variables
+├─ .env.production               # Production config
+├─ package.json                  # Dependencies & scripts
+├─ vite.config.js                # Vite config
+└─ README.md
 ```
 
 ---
@@ -68,38 +45,7 @@ VITE_API_URL=https://medicalbooking-api.koyeb.app
 
 ---
 
-## 🧪 Scripts
-
-```bash
-npm run dev      # start Vite dev server
-npm run build    # production build
-npm run preview  # preview the production build locally
-```
-
----
-
-## 🧩 Local dev proxy (optional)
-
-If you prefer not to change CORS on the API during local dev, you can proxy API paths in `vite.config.js`:
-
-```js
-// vite.config.js
-export default {
-  server: {
-    proxy: {
-      '/api':  { target: 'http://localhost:8080', changeOrigin: true, secure: false },
-      '/auth': { target: 'http://localhost:8080', changeOrigin: true, secure: false },
-    },
-  },
-};
-```
-
----
-
-## 📸 Screenshots
-For the full gallery, see the backend README: https://github.com/Xenios7/bookingapi
-
----
-
 ## 📜 License
-MIT – see [LICENSE](LICENSE).
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
