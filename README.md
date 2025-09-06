@@ -1,148 +1,105 @@
-# 🏥 Healthcare Booking App
+# Medical Booking – Frontend (React + Vite)
 
-End-to-end medical appointments platform — patients book visits, doctors manage availability, admins oversee operations.
-
----
-
-## 🚀 Live Demo
-
-- **Web:** https://medicalbooking.koyeb.app/
-- **API:** https://medicalbooking-api.koyeb.app/ → Swagger at `/swagger-ui`
+A lightweight **React + Vite** frontend for the Medical Booking system.  
+The **backend (Spring Boot API)** lives here → https://github.com/Xenios7/bookingapi
 
 ---
 
-## ⚡ Quick Start (Local)
+## 🌐 Live & Docs
+- **Live app:** https://medicalbooking.koyeb.app
+- **Backend Swagger UI:** https://medicalbooking-api.koyeb.app/swagger-ui.html
+- **Demo video:** https://youtu.be/CqW8P-5wNE0
+
+> Most screenshots, architecture notes, and longer docs are centralized in the backend repo to keep this README short.
+
+---
+
+## ⚙️ Quick Start
 
 ```bash
-# 1) Copy environment
+# 1) Clone
+git clone <your-frontend-repo-url>
+cd <your-frontend-repo-folder>
+
+# 2) Environment
 cp .env.example .env
+# then set VITE_API_URL to your API (cloud or local)
 
-# 2) Start everything
-docker compose up -d
+# 3) Install deps
+npm install
 
-# 3) Open:
-# Web → http://localhost:3000
-# API → http://localhost:8080  (Swagger at /swagger-ui)
+# 4) Run dev server
+npm run dev
 ```
 
----
-
-## 🔑 Environment Variables
-
-Create `.env` from `.env.example` and adjust as needed:
-
+### .env example
 ```dotenv
-# Database
-POSTGRES_DB=app
-POSTGRES_USER=app
-POSTGRES_PASSWORD=app
+# API base URL (choose one)
+VITE_API_URL=https://medicalbooking-api.koyeb.app
+# VITE_API_URL=http://localhost:8080
+```
 
-# Backend (Spring Boot)
-SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/app
-SPRING_DATASOURCE_USERNAME=app
-SPRING_DATASOURCE_PASSWORD=app
-SPRING_PROFILES_ACTIVE=prod
-JWT_SECRET=change-me-please
+> If you run the API locally, ensure backend CORS allows your dev origin (e.g., http://localhost:5173).
 
-# Frontend
-API_URL=http://localhost:8080
+---
+
+## 🧱 Project Structure (frontend)
+
+```
+.
+├─ public/
+│  └─ index.html
+└─ src/
+   ├─ auth/           # auth-related components/hooks
+   ├─ components/     # shared UI
+   ├─ hooks/          # custom hooks
+   ├─ pages/          # Login, Dashboards, Booking
+   ├─ services/       # API calls (uses VITE_API_URL)
+   ├─ App.jsx
+   ├─ main.jsx
+   └─ styles.css
 ```
 
 ---
 
-## ✨ Features
-
-- 📅 Appointment booking flow (create, confirm, cancel)
-- 👥 Role-based access (patient / doctor / admin)
-- 🗓️ Doctor availability & calendar view
-- 🔐 JWT authentication
-- 📜 OpenAPI/Swagger documentation
-- 🐳 One-command local run (Docker Compose)
+## 🔑 Auth (JWT)
+- Sends `Authorization: Bearer <token>` with API calls.
+- Role-based UI for **Patient / Doctor / Admin** matches backend rules.
 
 ---
 
-## 🧰 Tech Stack
+## 🧪 Scripts
 
-- **Backend:** Spring Boot, PostgreSQL, JWT  
-- **Frontend:** React (consumes `API_URL`)  
-- **Infra:** Docker Compose; Koyeb for production
-
----
-
-## 🧷 Repositories
-
-- **API:** https://github.com/Xenios7/Healthcare-Booking-Api  
-- **Web:** https://github.com/Xenios7/Healthcare-Booking-Frontend  
-
-> Looking for implementation details? See each repo’s README. This hub is the product page + one-command run.
+```bash
+npm run dev      # start Vite dev server
+npm run build    # production build
+npm run preview  # preview the production build locally
+```
 
 ---
 
-## 🎥 Demo Video
+## 🧩 Local dev proxy (optional)
 
-Place your video under `docs/` and it will appear here.
+If you prefer not to change CORS on the API during local dev, you can proxy API paths in `vite.config.js`:
 
-- **High quality (download / preview):** `docs/demo.mov`  
-- **Best browser compatibility:** convert a copy to MP4 → `docs/demo.mp4`
-
-<!-- Inline player (works best with .mp4); GitHub may still render as a link -->
-<video src="docs/demo.mp4" controls width="720">
-  Your browser does not support the video tag.
-  <a href="docs/demo.mp4">Download the demo video</a>.
-</video>
+```js
+// vite.config.js
+export default {
+  server: {
+    proxy: {
+      '/api':  { target: 'http://localhost:8080', changeOrigin: true, secure: false },
+      '/auth': { target: 'http://localhost:8080', changeOrigin: true, secure: false },
+    },
+  },
+};
+```
 
 ---
 
 ## 📸 Screenshots
-
-Put images in `docs/screens/` (use any filenames). A few examples:
-
-- `docs/screens/landing.png`  
-- `docs/screens/booking.png`  
-- `docs/screens/calendar.png`  
-- `docs/screens/admin.png`
-
-> 💡 Tip: Keep images ~1200px wide for crisp rendering. PNG for UI, SVG/PNG for diagrams.
+For the full gallery, see the backend README: https://github.com/Xenios7/bookingapi
 
 ---
 
-## 🧠 Architecture
-
-Export your diagram to `docs/architecture.png`.
-
-**Flow:** Web (React) → API (Spring Boot) → PostgreSQL  
-**Auth:** JWT (role-based endpoints)  
-**Deploy:** Koyeb (Frankfurt, eu-central-1)
-
----
-
-## 🗄️ Database
-
-### 🧩 ERD
-
-Export to `docs/erd.png`.
-
----
-
-## 📚 API Docs
-
-- **Local Swagger UI:** `http://localhost:8080/swagger-ui`  
-- **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`  
-- **Prod Swagger:** `https://medicalbooking-api.koyeb.app/swagger-ui`
-
----
-
-## ☁️ Deployment
-
-### ☁️ Koyeb (Production)
-
-- **Web:** `healthcare-booking-frontend` → https://medicalbooking.koyeb.app/  
-  - Env: `API_URL=https://medicalbooking-api.koyeb.app`
-- **API:** `healthcare-booking-api` → https://medicalbooking-api.koyeb.app/  
-  - Env: DB URL/creds, `SPRING_PROFILES_ACTIVE=prod`, `JWT_SECRET=…`
-- **Database:** Postgres v17 → `ep-cold-scene-a2ffs6hj.eu-central-1.pg.koyeb.app`
-
-### 🐳 Docker (Local)
-
-- `docker compose up -d` brings up Web, API, DB.  
-- Ports: Web **3000**, API **8080**, Postgres **5432**.
+## 📜 License
+MIT – see [LICENSE](LICENSE).
